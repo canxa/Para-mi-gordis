@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Para Ti: Mis Flores Amarillas 🌻</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Great+Vibes&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-top: #0a0818;
+      --bg-mid: #1c1427;
+      --bg-bottom: #0f1712;
+      --gold-light: #fef08a;
+      --gold-main: #f59e0b;
+      --gold-dark: #b45309;
+      --stem-green: #22543d;
+      --stem-light: #38a169;
+      --leaf-green: #2f855a;
+      --center-brown: #3e1f07;
+      --card-bg: rgba(255, 253, 240, 0.95);
+      --card-text: #2d1810;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    /* Fondo animado */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 650px;
+      padding: 20px 16px 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Encabezado */
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    header h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(2.4rem, 9vw, 4rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.6), 0 0 40px rgba(251, 191, 36, 0.3);
+      letter-spacing: 1px;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+      color: #fde68a;
+      opacity: 0.9;
+    }
+
+    /* ==========================================================
+       JARDÍN RESPONSIVE
+       ========================================================== */
+    .garden {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 12px;
+      height: 320px;
+      width: 100%;
+      margin: 10px 0 20px;
+      position: relative;
+    }
+
+    .flower-stem-group {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: bottom center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.25s ease;
+    }
+
+    .flower-stem-group:active {
+      transform: scale(1.08) translateY(-4px);
+    }
+
+    .stem {
+      width: 7px;
+      background: linear-gradient(180deg, var(--stem-light), var(--stem-green));
+      border-radius: 6px;
+      box-shadow: inset 1px 0 2px rgba(255, 255, 255, 0.3);
+      position: relative;
+    }
+
+    .leaf {
+      position: absolute;
+      width: 26px;
+      height: 14px;
+      background: linear-gradient(135deg, var(--stem-light), var(--leaf-green));
+      border-radius: 0 16px 0 16px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .leaf.left {
+      left: -22px;
+      top: 40%;
+      transform: rotate(-25deg);
+    }
+
+    .leaf.right {
+      right: -22px;
+      top: 60%;
+      transform: rotate(25deg) scaleX(-1);
+    }
+
+    /* Cabeza de la flor */
+    .flower-head {
+      position: relative;
+      width: 105px;
+      height: 105px;
+      margin-bottom: -12px;
+      z-index: 2;
+      animation: gentleSway 5s ease-in-out infinite alternate;
+    }
+
+    .petals {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .petal {
+      position: absolute;
+      width: 18px;
+      height: 48px;
+      background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-main) 65%, var(--gold-dark) 100%);
+      border-radius: 50% 50% 20% 20%;
+      transform-origin: bottom center;
+      bottom: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .petals.inner .petal {
+      width: 14px;
+      height: 38px;
+      background: linear-gradient(180deg, #fffbeb 0%, #f59e0b 80%, #b45309 100%);
+      opacity: 0.95;
+    }
+
+    .flower-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #5c2b09 0%, var(--center-brown) 70%, #1f0d02 100%);
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.7), 0 0 10px rgba(245, 158, 11, 0.4);
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .flower-center::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(#d97706 1px, transparent 1px);
+      background-size: 4px 4px;
+      opacity: 0.6;
+    }
+
+    .flower-glow {
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .flower-stem-group:hover .flower-glow,
+    .flower-stem-group:active .flower-glow {
+      opacity: 1;
+    }
+
+    /* ==========================================================
+       AJUSTES PARA CELULARES PEQUEÑOS (<= 480px)
+       ========================================================== */
+    @media (max-width: 480px) {
+      .garden {
+        height: 250px;
+        gap: 6px;
+        margin-bottom: 15px;
+      }
+
+      /* Escalado proporcional para que quepan las 5 flores perfectas */
+      .flower-head {
+        width: 80px;
+        height: 80px;
+        margin-bottom: -10px;
+      }
+
+      .petal {
+        width: 14px;
+        height: 36px;
+      }
+
+      .petals.inner .petal {
+        width: 10px;
+        height: 28px;
+      }
+
+      .flower-center {
+        width: 28px;
+        height: 28px;
+      }
+
+      .stem {
+        width: 6px;
+      }
+
+      .leaf {
+        width: 20px;
+        height: 10px;
+      }
+      .leaf.left { left: -16px; }
+      .leaf.right { right: -16px; }
+
+      /* Alturas ajustadas para celulares */
+      #fg-0 { height: 180px !important; }
+      #fg-0 .stem { height: 95px !important; }
+
+      #fg-1 { height: 215px !important; }
+      #fg-1 .stem { height: 130px !important; }
+
+      #fg-2 { height: 245px !important; }
+      #fg-2 .stem { height: 155px !important; }
+
+      #fg-3 { height: 210px !important; }
+      #fg-3 .stem { height: 125px !important; }
+
+      #fg-4 { height: 175px !important; }
+      #fg-4 .stem { height: 90px !important; }
+    }
+
+    /* ==========================================================
+       CARTA DEDICATORIA
+       ========================================================== */
+    .letter-card {
+      background: var(--card-bg);
+      color: var(--card-text);
+      width: 100%;
+      border-radius: 18px;
+      padding: 30px 22px 22px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(245, 158, 11, 0.25);
+      position: relative;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+      backdrop-filter: blur(10px);
+      margin-bottom: 22px;
+      animation: floatUp 1s ease;
+      user-select: none;
+    }
+
+    .letter-card::before {
+      content: '🌻';
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.8rem;
+      background: #fff;
+      border-radius: 50%;
+      padding: 1px 6px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .letter-recipient {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.3rem);
+      color: #92400e;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .letter-body {
+      font-family: 'Caveat', cursive;
+      font-size: clamp(1.35rem, 5vw, 1.6rem);
+      line-height: 1.45;
+      color: #451a03;
+      margin-bottom: 14px;
+    }
+
+    .letter-signature {
+      font-family: 'Caveat', cursive;
+      font-size: clamp(1.25rem, 4.5vw, 1.45rem);
+      text-align: right;
+      color: #78350f;
+      font-weight: 700;
+    }
+
+    /* Botón */
+    .controls {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 28px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #1f1202;
+      width: min(280px, 90%);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    @keyframes gentleSway {
+      0% { transform: rotate(-3deg); }
+      100% { transform: rotate(3deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="container">
+    <header>
+      <h1>Flores Amarillas</h1>
+      <p>Un detalle que nunca marchita 💛</p>
+    </header>
+
+    <!-- Jardín de 5 flores -->
+    <div class="garden" id="garden">
+      <!-- Flor 1 -->
+      <div class="flower-stem-group" id="fg-0" style="height: 240px;">
+        <div class="flower-glow"></div>
+        <div class="flower-head" id="fh-0">
+          <div class="petals outer" id="outer-0"></div>
+          <div class="petals inner" id="inner-0"></div>
+          <div class="flower-center"></div>
+        </div>
+        <div class="stem" style="height: 130px;">
+          <div class="leaf left"></div>
+        </div>
+      </div>
+
+      <!-- Flor 2 -->
+      <div class="flower-stem-group" id="fg-1" style="height: 285px;">
+        <div class="flower-glow"></div>
+        <div class="flower-head" id="fh-1">
+          <div class="petals outer" id="outer-1"></div>
+          <div class="petals inner" id="inner-1"></div>
+          <div class="flower-center"></div>
+        </div>
+        <div class="stem" style="height: 175px;">
+          <div class="leaf right"></div>
+        </div>
+      </div>
+
+      <!-- Flor 3 (Flor central) -->
+      <div class="flower-stem-group" id="fg-2" style="height: 320px;">
+        <div class="flower-glow"></div>
+        <div class="flower-head" id="fh-2" style="transform: scale(1.1);">
+          <div class="petals outer" id="outer-2"></div>
+          <div class="petals inner" id="inner-2"></div>
+          <div class="flower-center"></div>
+        </div>
+        <div class="stem" style="height: 205px; width: 9px;">
+          <div class="leaf left"></div>
+          <div class="leaf right" style="top: 35%;"></div>
+        </div>
+      </div>
+
+      <!-- Flor 4 -->
+      <div class="flower-stem-group" id="fg-3" style="height: 280px;">
+        <div class="flower-glow"></div>
+        <div class="flower-head" id="fh-3">
+          <div class="petals outer" id="outer-3"></div>
+          <div class="petals inner" id="inner-3"></div>
+          <div class="flower-center"></div>
+        </div>
+        <div class="stem" style="height: 170px;">
+          <div class="leaf left"></div>
+        </div>
+      </div>
+
+      <!-- Flor 5 -->
+      <div class="flower-stem-group" id="fg-4" style="height: 235px;">
+        <div class="flower-glow"></div>
+        <div class="flower-head" id="fh-4">
+          <div class="petals outer" id="outer-4"></div>
+          <div class="petals inner" id="inner-4"></div>
+          <div class="flower-center"></div>
+        </div>
+        <div class="stem" style="height: 125px;">
+          <div class="leaf right"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carta Fija -->
+    <div class="letter-card">
+      <div class="letter-recipient">Para ti mi tontis, con cariño</div>
+      <div class="letter-body">
+        "Para que en tus días grises nunca te falte un pedacito de sol."
+      </div>
+      <div class="letter-signature">— De tu gordo</div>
+    </div>
+
+    <!-- Botón -->
+    <div class="controls">
+      <button class="btn" id="btn-burst">
+        ✨ Lluvia de Pétalos
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* Generación de pétalos CSS */
+    const NUM_OUTER_PETALS = 14;
+    const NUM_INNER_PETALS = 12;
+
+    for (let f = 0; f < 5; f++) {
+      const outerEl = document.getElementById(`outer-${f}`);
+      const innerEl = document.getElementById(`inner-${f}`);
+
+      for (let i = 0; i < NUM_OUTER_PETALS; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        const deg = (360 / NUM_OUTER_PETALS) * i;
+        petal.style.transform = `rotate(${deg}deg)`;
+        outerEl.appendChild(petal);
+      }
+
+      for (let i = 0; i < NUM_INNER_PETALS; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        const deg = (360 / NUM_INNER_PETALS) * i + (360 / NUM_INNER_PETALS / 2);
+        petal.style.transform = `rotate(${deg}deg)`;
+        innerEl.appendChild(petal);
+      }
+    }
+
+    /* Audio ambiental suave */
+    let audioCtx = null;
+    const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+
+    function playNote(freq) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.2);
+      } catch (e) {}
+    }
+
+    function flowerClick(index) {
+      playNote(notes[index % notes.length]);
+      burstAtFlower(index);
+    }
+
+    // Asignar eventos táctiles y de clic a cada flor
+    for (let f = 0; f < 5; f++) {
+      const el = document.getElementById(`fg-${f}`);
+      el.addEventListener('pointerdown', (e) => {
+        flowerClick(f);
+      });
+    }
+
+    /* Partículas y pétalos */
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const NUM_FIREFLIES = window.innerWidth < 500 ? 20 : 35;
+
+    for (let i = 0; i < NUM_FIREFLIES; i++) {
+      particles.push({
+        type: 'firefly',
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2 + 1,
+        alpha: Math.random() * 0.7 + 0.3,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5,
+        pulseSpeed: Math.random() * 0.04 + 0.01
+      });
+    }
+
+    function addPetal(x, y, vx, vy) {
+      particles.push({
+        type: 'petal',
+        x: x !== undefined ? x : Math.random() * width,
+        y: y !== undefined ? y : -20,
+        vx: vx !== undefined ? vx : (Math.random() - 0.5) * 1.5,
+        vy: vy !== undefined ? vy : Math.random() * 2 + 1.2,
+        size: Math.random() * 6 + (window.innerWidth < 500 ? 5 : 7),
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 3,
+        alpha: 1,
+        decay: 0.0025
+      });
+    }
+
+    function triggerPetalBurst() {
+      notes.forEach((note, idx) => {
+        setTimeout(() => playNote(note), idx * 90);
+      });
+
+      const count = window.innerWidth < 500 ? 30 : 45;
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          addPetal(Math.random() * width, -10, (Math.random() - 0.5) * 2, Math.random() * 2.5 + 1.5);
+        }, i * 35);
+      }
+    }
+
+    document.getElementById('btn-burst').addEventListener('click', triggerPetalBurst);
+
+    function burstAtFlower(index) {
+      const fh = document.getElementById(`fh-${index}`);
+      const rect = fh.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      const count = window.innerWidth < 500 ? 12 : 18;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 3.5 + 1.2;
+        particles.push({
+          type: 'petal',
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1,
+          size: Math.random() * 5 + 4,
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 6,
+          alpha: 1,
+          decay: 0.015
+        });
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      if (Math.random() < 0.035) {
+        addPetal();
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        if (p.type === 'firefly') {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.02;
+
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(254, 240, 138, ${Math.max(0.15, Math.min(0.9, p.alpha))})`;
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          ctx.restore();
+
+        } else if (p.type === 'petal') {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+          p.alpha -= p.decay;
+
+          if (p.alpha <= 0 || p.y > height + 20) {
+            particles.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.globalAlpha = Math.max(0, p.alpha);
+
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size);
+          ctx.quadraticCurveTo(p.size * 0.7, 0, 0, p.size);
+          ctx.quadraticCurveTo(-p.size * 0.7, 0, 0, -p.size);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
